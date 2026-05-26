@@ -12,18 +12,26 @@ import jakarta.validation.constraints.NotNull;
 
 public class EventRequest {
 
-    @NotBlank
+    @NotBlank(message = "eventId is required")
     private String eventId;
 
-    @NotBlank
+    @NotBlank(message = "accountId is required")
     private String accountId;
 
-    @NotNull
+    @NotNull(message = "type is required")
     private EventType type;
 
-    @NotNull
-    @DecimalMin(value = "0.01", inclusive = true)
+    @NotNull(message = "amount is required")
+    @DecimalMin(value = "0.01", message = "amount must be greater than 0")
     private BigDecimal amount;
+    
+    @NotBlank(message = "currency is required")
+    private String currency;
+
+    @NotNull(message = "eventTimestamp is required")
+    private Instant eventTimestamp;
+
+    private Map<String, String> metadata;
 
     public String getEventId() {
 		return eventId;
@@ -73,22 +81,13 @@ public class EventRequest {
 		this.eventTimestamp = eventTimestamp;
 	}
 
-	public Map<String, Object> getMetadata() {
+	public Map<String, String> getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(Map<String, Object> metadata) {
+	public void setMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
 	}
 
-	@NotBlank
-    private String currency;
-
-    @NotNull
-    private Instant eventTimestamp;
-
-    private Map<String, Object> metadata;
-
-    // getters & setters
 }
 

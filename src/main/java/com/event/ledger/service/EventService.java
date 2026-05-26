@@ -7,22 +7,20 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.event.ledger.dto.BalanceResponse;
 import com.event.ledger.dto.EventRequest;
+import com.event.ledger.exception.ResourceNotFoundException;
 import com.event.ledger.model.Event;
-import com.event.ledger.model.EventType;
 import com.event.ledger.repository.EventRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 @Transactional
 public class EventService {
 
     private final EventRepository repository;
-    private final ObjectMapper mapper;
 
-    public EventService(EventRepository repository, ObjectMapper mapper) {
+    public EventService(EventRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
     }
 
     public Event createEvent(EventRequest request) {
@@ -33,42 +31,31 @@ public class EventService {
             return existing.get(); // return original
         }
 
-        Event e = new Event();
-        e.setEventId(request.getEventId());
-        e.setAccountId(request.getAccountId());
-        e.setType(request.getType());
-        e.setAmount(request.getAmount());
-        e.setCurrency(request.getCurrency());
-        e.setEventTimestamp(request.getEventTimestamp());
+        Event event = new Event();
+        event.setEventId(request.getEventId());
+        event.setAccountId(request.getAccountId());
+        event.setType(request.getType());
+        event.setAmount(request.getAmount());
+        event.setCurrency(request.getCurrency());
+        event.setEventTimestamp(request.getEventTimestamp());
+        event.setMetadata(request.getMetadata());
 
-        try {
-            if (request.getMetadata() != null) {
-                e.setMetadata(mapper.writeValueAsString(request.getMetadata()));
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Metadata serialization failed");
-        }
-
-        return repository.save(e);
+        return repository.save(event);
     }
 
-    public Event getByEventId(String eventId) {
+    public Event getEventByEventId(String eventId) {
         return repository.findByEventId(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Event not found: " + eventId
+                ));
     }
 
-    public List<Event> getByAccount(String accountId) {
+    public List<Event> getEventsByAccountId(String accountId) {
         return repository.findByAccountIdOrderByEventTimestampAsc(accountId);
     }
 
-    public BigDecimal computeBalance(String accountId) {
-
-        List<Event> events = getByAccount(accountId);
-
-        return events.stream()
-                .map(e -> e.getType() == EventType.CREDIT
-                        ? e.getAmount()
-                        : e.getAmount().negate())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public BalanceResponse getBalance(String accountId) {
+        BigDecimal balance = repository.calculateBalance(accountId);
+        return new BalanceResponse(accountId, balance);
     }
 }
