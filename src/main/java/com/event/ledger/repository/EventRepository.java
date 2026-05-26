@@ -16,10 +16,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByAccountIdOrderByEventTimestampAsc(String accountId);
     
     @Query("""
-            SELECT COALESCE(
-                SUM(CASE WHEN e.type = 'CREDIT' THEN e.amount ELSE -e.amount END),
-                0
-            )
+            SELECT SUM(CASE WHEN e.type = 'CREDIT' THEN e.amount ELSE -e.amount END)
             FROM Event e
             WHERE e.accountId = :accountId
             """)

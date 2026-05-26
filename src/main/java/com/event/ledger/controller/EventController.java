@@ -2,6 +2,8 @@ package com.event.ledger.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping
 public class EventController {
+	
+	private static final Logger log = LoggerFactory.getLogger(EventController.class);
 
     private final EventService service;
 
@@ -30,13 +34,15 @@ public class EventController {
     }
 
     @PostMapping("/events")
-    public ResponseEntity<Event> create(@Valid @RequestBody EventRequest request) {
+    public ResponseEntity<Event> createEvent(@Valid @RequestBody EventRequest request) {
 
+    	log.info("POST /events called for eventId={}", request.getEventId());
         boolean exists = false;
 
         try {
             service.getEventByEventId(request.getEventId());
             exists = true;
+            log.info("Event with eventId={} already exists", request.getEventId());
         } catch (Exception ignored) {
         }
 
@@ -50,16 +56,19 @@ public class EventController {
 
     @GetMapping("/events/{id}")
     public Event getEvent(@PathVariable String id) {
+    	log.info("GET /events/{} called", id);
         return service.getEventByEventId(id);
     }
 
     @GetMapping("/events")
     public List<Event> getEventsByAccount(@RequestParam String account) {
+    	log.info("GET /events?account={} called", account);
         return service.getEventsByAccountId(account);
     }
 
     @GetMapping("/accounts/{accountId}/balance")
     public ResponseEntity<BalanceResponse> getBalance(@PathVariable String accountId) {
+    	log.info("GET /accounts/{}/balance called", accountId);
         return ResponseEntity.ok(service.getBalance(accountId));
     }
 }

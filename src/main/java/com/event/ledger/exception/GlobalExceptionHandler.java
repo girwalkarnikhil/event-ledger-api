@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,9 +17,13 @@ import com.event.ledger.dto.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+	
+	private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+		
+		log.warn("Validation failed: {}", ex.getMessage());
 
         String message = ex.getBindingResult()
                 .getFieldErrors()
@@ -36,12 +42,14 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<String> handleParseError(HttpMessageNotReadableException ex) {
+		log.warn("Validation failed: {}", ex.getMessage());
 		return ResponseEntity.badRequest().body("Invalid request format: " + ex.getMessage());
 	}
 
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntime(RuntimeException ex) {
+    	log.error("Unhandled exception occurred", ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
