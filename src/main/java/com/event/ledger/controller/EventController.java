@@ -50,7 +50,7 @@ public class EventController {
 
         // If duplicate -> 200 OK
         return ResponseEntity
-                .status(exists ? HttpStatus.OK : HttpStatus.CREATED)
+                .status(exists ? HttpStatus.CONFLICT : HttpStatus.CREATED)
                 .body(response);
     }
 

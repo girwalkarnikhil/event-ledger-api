@@ -40,7 +40,7 @@ class EventLedgerIntegrationTest {
         mockMvc.perform(post("/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
-                .andExpect(status().isOk());
+                .andExpect(status().isConflict());
 
         mockMvc.perform(get("/accounts/acct-100/balance"))
                 .andExpect(status().isOk())
