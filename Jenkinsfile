@@ -15,7 +15,7 @@ pipeline {
         stage('API Diff Check') {
             steps {
                 echo "API Diff Check running..."
-                sh 'oasdiff breaking api-specs/openapi-test1.yaml api-specs/openapi-test2.yaml'
+                sh 'oasdiff diff api-specs/openapi-test1.yaml api-specs/openapi-test2.yaml'
             }
         }
         
