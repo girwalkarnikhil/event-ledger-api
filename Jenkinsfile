@@ -2,14 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Define environment variables if needed
         APP_NAME = "event-ledger-api"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Pull code from GitHub
                 echo "Pull code from GitHub ${APP_NAME}..."
             }
         }
@@ -17,18 +15,19 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building ${APP_NAME}..."
-                //sh './gradlew clean build'   // Example for Gradle build
+                // sh './gradlew clean build'
             }
         }
 
         stage('Test') {
             steps {
                 echo "Running tests..."
-                //sh './gradlew test'
+                // sh './gradlew test'
             }
             post {
-                //always {
-                  //  junit '**/build/test-results/test/*.xml'
+                always {
+                    echo "Tests completed (results publishing disabled for now)."
+                    // junit '**/build/test-results/test/*.xml'
                 }
             }
         }
@@ -36,8 +35,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying ${APP_NAME}..."
-                // Replace with your deployment script or commands
-               // sh './scripts/deploy.sh'
+                // sh './scripts/deploy.sh'
             }
         }
     }
